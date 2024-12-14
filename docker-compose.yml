@@ -1,0 +1,26 @@
+networks:
+  mynetworkapi:
+
+services:
+  sqlserverdocker:
+    container_name: sql-server-docker
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+       - 8006:1433
+    environment:
+       - ACCEPT_EULA=Y
+       - MSSQL_SA_PASSWORD=MyPassword*1234
+    networks:
+        - mynetworkapi
+
+  almacen:
+    image: ${DOCKER_REGISTRY-}almacen
+    build:
+      context: .
+      dockerfile: Almacen/Dockerfile
+    networks:
+        - mynetworkapi
+    depends_on:
+        - sqlserverdocker
+    ports:
+        - 5001:8081

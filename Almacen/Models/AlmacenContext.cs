@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Almacen.Models;
 
@@ -9,6 +11,21 @@ public partial class AlmacenContext : DbContext
     public AlmacenContext(DbContextOptions<AlmacenContext> options)
         : base(options)
     {
+        try
+        {
+            var dbCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+            if (dbCreator != null)
+            {
+                if (!dbCreator.CanConnect())
+                    dbCreator.Create();
+                if (!dbCreator.HasTables())
+                    dbCreator.CreateTables();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     public virtual DbSet<Categoria> Categorias { get; set; }
