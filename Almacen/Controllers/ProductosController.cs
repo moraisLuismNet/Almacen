@@ -305,8 +305,8 @@ namespace Almacen.Controllers
                 Precio = producto.Precio,
                 //FechaAlta = producto.FechaAlta,
                 FechaAlta = DateOnly.FromDateTime(DateTime.Now),
-                //Descatalogado = producto.Descatalogado,
-                Descatalogado = false,
+                Descatalogado = producto.Descatalogado,
+                //Descatalogado = false,
                 FotoUrl = "",
                 CategoriaId = (int)producto.CategoriaId
             };
@@ -323,7 +323,7 @@ namespace Almacen.Controllers
                     var extension = Path.GetExtension(producto.Foto.FileName);
                     // Recibimos el nombre del archivo
                     // El servicio Transient GestorArchivos instancia el servicio y cuando se deja de usar se destruye
-                    newProducto.FotoUrl = await _gestorArchivosService.GuardarArchivo(contenido, extension, "imagenes",
+                    newProducto.FotoUrl = await _gestorArchivosService.GuardarArchivo(contenido, extension, "img",
                         producto.Foto.ContentType);
                 }
             }
@@ -390,7 +390,7 @@ namespace Almacen.Controllers
                 return NotFound();
             }
 
-            await _gestorArchivosService.BorrarArchivo(producto.FotoUrl, "imagenes");
+            await _gestorArchivosService.BorrarArchivo(producto.FotoUrl, "img");
             _context.Remove(producto);
             await _context.SaveChangesAsync();
             return Ok();

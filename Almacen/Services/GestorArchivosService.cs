@@ -42,7 +42,7 @@
         {
             // Creamos un nombre aleatorio con la extensión
             var nombreArchivo = $"{Guid.NewGuid()}{extension}";
-            // La ruta será wwwroot/carpeta (en este caso imagenes)
+            // La ruta será wwwroot/img
             string folder = Path.Combine(_env.WebRootPath, carpeta);
 
             // Si no existe la carpeta la creamos
