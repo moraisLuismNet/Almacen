@@ -1,3 +1,4 @@
+using Almacen.Middlewares;
 using Almacen.Models;
 using Almacen.Services;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Middleware para acceder a archivos estáticos de la carpeta wwwroot (Ponerlo antes de app.Run() - 12:20
+// Middleware para acceder a archivos estáticos de la carpeta wwwroot 
 app.UseStaticFiles();
+
+app.UseMiddleware<RegistroYControlMiddleware>();
 
 app.Run();
