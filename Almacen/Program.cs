@@ -29,6 +29,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<ActionsService>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddTransient<IGestorArchivosService, GestorArchivosService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,5 +46,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Middleware para acceder a archivos estáticos de la carpeta wwwroot (Ponerlo antes de app.Run() - 12:20
+app.UseStaticFiles();
 
 app.Run();

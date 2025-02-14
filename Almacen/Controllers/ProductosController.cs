@@ -12,11 +12,14 @@ namespace Almacen.Controllers
     {
         private readonly AlmacenContext _context;
         private readonly ActionsService _actionsService;
+        private readonly IGestorArchivosService _gestorArchivosService;
 
-        public ProductosController(AlmacenContext context, ActionsService actionsService)
+
+        public ProductosController(AlmacenContext context, ActionsService actionsService, IGestorArchivosService gestorArchivosService)
         {
             _context = context;
             _actionsService = actionsService;
+            _gestorArchivosService = gestorArchivosService;
         }
 
         [HttpGet]
@@ -300,15 +303,34 @@ namespace Almacen.Controllers
             {
                 NombreProducto = producto.NombreProducto,
                 Precio = producto.Precio,
-                FechaAlta = producto.FechaAlta,
-                Descatalogado = producto.Descatalogado,
-                FotoUrl = producto.FotoUrl,
+                //FechaAlta = producto.FechaAlta,
+                FechaAlta = DateOnly.FromDateTime(DateTime.Now),
+                //Descatalogado = producto.Descatalogado,
+                Descatalogado = false,
+                FotoUrl = "",
                 CategoriaId = (int)producto.CategoriaId
             };
 
+            if (producto.Foto != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    // Extraemos la imagen de la petición
+                    await producto.Foto.CopyToAsync(memoryStream);
+                    // La convertimos a un array de bytes que es lo que necesita el método de guardar
+                    var contenido = memoryStream.ToArray();
+                    // La extensión la necesitamos para guardar el archivo
+                    var extension = Path.GetExtension(producto.Foto.FileName);
+                    // Recibimos el nombre del archivo
+                    // El servicio Transient GestorArchivos instancia el servicio y cuando se deja de usar se destruye
+                    newProducto.FotoUrl = await _gestorArchivosService.GuardarArchivo(contenido, extension, "imagenes",
+                        producto.Foto.ContentType);
+                }
+            }
+
             await _context.AddAsync(newProducto);
             await _context.SaveChangesAsync();
-
+            //return Ok(newProducto);
             return Created("Producto", new { producto = newProducto });
         }
 
@@ -368,6 +390,7 @@ namespace Almacen.Controllers
                 return NotFound();
             }
 
+            await _gestorArchivosService.BorrarArchivo(producto.FotoUrl, "imagenes");
             _context.Remove(producto);
             await _context.SaveChangesAsync();
             return Ok();
