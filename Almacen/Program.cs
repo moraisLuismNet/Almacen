@@ -1,3 +1,4 @@
+using Almacen.Filters;
 using Almacen.Middlewares;
 using Almacen.Models;
 using Almacen.Services;
@@ -10,9 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Esta opción es para evitar referencias circulares al utilizar include en los controllers
-builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-string connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ??
-                            builder.Configuration.GetConnectionString("DefaultConnection");
+//builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(typeof(FiltroDeExcepcion));
+
+}).AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 
 builder.Services.AddDbContext<AlmacenContext>(options =>
 {
@@ -21,7 +28,6 @@ builder.Services.AddDbContext<AlmacenContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 }
 );
-
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -33,7 +39,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IGestorArchivosService, GestorArchivosService>();
 builder.Services.AddHostedService<TareaProgramadaService>();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -46,13 +58,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseAuthorization();
+
+app.UseMiddleware<RegistroYControlMiddleware>();
 
 app.MapControllers();
 
 // Middleware para acceder a archivos estáticos de la carpeta wwwroot 
 app.UseStaticFiles();
-
-app.UseMiddleware<RegistroYControlMiddleware>();
 
 app.Run();
