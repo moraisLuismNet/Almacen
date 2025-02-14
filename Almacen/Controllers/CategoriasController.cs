@@ -2,6 +2,7 @@
 using Almacen.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Almacen.Services;
 
 namespace Almacen.Controllers
 {
@@ -10,15 +11,18 @@ namespace Almacen.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly AlmacenContext _context;
+        private readonly ActionsService _actionsService;
 
-        public CategoriasController(AlmacenContext context)
+        public CategoriasController(AlmacenContext context, ActionsService actionsService)
         {
             _context = context;
+            _actionsService = actionsService;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<CategoriaDTO>>> GetCategorias()
         {
+            await _actionsService.AddAction("Obtener categorías", "Categorias");
             var categorias = await _context.Categorias
                 .Include(c => c.Productos)
                 .ToListAsync();
@@ -44,6 +48,7 @@ namespace Almacen.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<CategoriaItemDTO>> GetCategoriaPorId(int id)
         {
+            await _actionsService.AddAction("Obtener categorías por id", "Categorias");
             var categoria = await _context.Categorias
                                           
                                           .FirstOrDefaultAsync(c => c.IdCategoria == id);
@@ -62,8 +67,9 @@ namespace Almacen.Controllers
         }
 
         [HttpGet("ordenNombreCategoria/{desc}")]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetFamiliasOrdenNombre(bool desc)
+        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasOrdenNombre(bool desc)
         {
+            await _actionsService.AddAction("Obtener categorías por orden (nombre)", "Categorias");
             List<Categoria> categorias;
 
             if (desc)
@@ -87,6 +93,7 @@ namespace Almacen.Controllers
         [HttpGet("nombreCategoria/contiene/{texto}")]
         public async Task<ActionResult<List<CategoriaDTO>>> GetNombreCategoria(string texto)
         {
+            await _actionsService.AddAction("Obtener categorías que contienen (nombre)", "Categorias");
             var categorias = await _context.Categorias
                 .Where(x => x.NombreCategoria.Contains(texto))
                 .Include(x => x.Productos)
@@ -183,6 +190,7 @@ namespace Almacen.Controllers
         [HttpGet("categoriasProductosSelect/{id:int}")]
         public async Task<ActionResult<Categoria>> GetCategoriasProductosSelect(int id)
         {
+            await _actionsService.AddAction("Obtener categorías y productos", "Categorias");
             var categoria = await (from x in _context.Categorias
                                  select new CategoriaProductoDTO
                                  {
@@ -217,7 +225,7 @@ namespace Almacen.Controllers
             return Created("Categoria", new { categoria = newCategoria });
         }
 
-        [HttpPut("{idCategoria}")]
+        [HttpPut("{idCategoria:int}")]
         public async Task<IActionResult> PutCategoria(int idCategoria, [FromBody] CategoriaUpdateDTO categoria)
         {
             if (!ModelState.IsValid)

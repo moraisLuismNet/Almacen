@@ -1,4 +1,5 @@
 using Almacen.Models;
+using Almacen.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
@@ -24,6 +25,9 @@ builder.Services.AddDbContext<AlmacenContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<ActionsService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

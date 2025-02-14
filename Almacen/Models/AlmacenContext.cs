@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -32,6 +33,8 @@ public partial class AlmacenContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
+    public virtual DbSet<Action> Actions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Categoria>(entity =>
@@ -53,6 +56,16 @@ public partial class AlmacenContext : DbContext
                 .HasForeignKey(d => d.CategoriaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Categorias_Productos");
+        });
+
+        modelBuilder.Entity<Action>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Action__3214EC07BA4C2A33");
+
+            entity.Property(e => e.Controller).HasMaxLength(50);
+            entity.Property(e => e.FechaAccion).HasColumnType("datetime");
+            entity.Property(e => e.Ip).HasMaxLength(50);
+            entity.Property(e => e.Accion).HasMaxLength(50);
         });
 
         OnModelCreatingPartial(modelBuilder);

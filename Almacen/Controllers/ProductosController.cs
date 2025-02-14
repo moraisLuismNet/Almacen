@@ -2,6 +2,7 @@
 using Almacen.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Almacen.Services;
 
 namespace Almacen.Controllers
 {
@@ -10,15 +11,18 @@ namespace Almacen.Controllers
     public class ProductosController : Controller
     {
         private readonly AlmacenContext _context;
+        private readonly ActionsService _actionsService;
 
-        public ProductosController(AlmacenContext context)
+        public ProductosController(AlmacenContext context, ActionsService actionsService)
         {
             _context = context;
+            _actionsService = actionsService;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ProductoDTO>>> GetProductos()
         {
+            await _actionsService.AddAction("Obtener productos", "Productos");
             var productos = await _context.Productos
                 .Include(p => p.Categoria)  
                 .ToListAsync();
@@ -39,6 +43,7 @@ namespace Almacen.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductoDTO>> GetProductoPorId(int id)
         {
+            await _actionsService.AddAction("Obtener productos por id", "Productos");
             var producto = await _context.Productos
                 .Include(p => p.Categoria)  
                 .FirstOrDefaultAsync(p => p.IdProducto == id);
@@ -65,6 +70,7 @@ namespace Almacen.Controllers
         [HttpGet("ordenNombreProducto/{desc}")]
         public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductosOrdenNombre(bool desc)
         {
+            await _actionsService.AddAction("Obtener productos por orden (nombre)", "Productos");
             List<ProductoDTO> productosDTO = new List<ProductoDTO>();
 
             List<Producto> productos;
@@ -100,6 +106,7 @@ namespace Almacen.Controllers
         [HttpGet("nombreProducto/contiene/{texto}")]
         public async Task<ActionResult<List<ProductoDTO>>> GetNombreProducto(string texto)
         {
+            await _actionsService.AddAction("Obtener productos que contienen (nombre)", "Productos");
             var productos = await _context.Productos
                 .Where(x => x.NombreProducto.Contains(texto))
                 .Include(p => p.Categoria) 
@@ -122,6 +129,7 @@ namespace Almacen.Controllers
         [HttpGet("precio/entre")]
         public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductosByPrecios([FromQuery] decimal min, [FromQuery] decimal max)
         {
+            await _actionsService.AddAction("Obtener productos con un precio entre", "Productos");
             var productos = await _context.Productos
                 .Where(x => x.Precio > min && x.Precio < max)
                 .Include(p => p.Categoria) 
@@ -200,6 +208,7 @@ namespace Almacen.Controllers
         [HttpGet("productoVenta")]
         public async Task<ActionResult<IEnumerable<ProductoVentaDTO>>> GetProductosYPrecios()
         {
+            await _actionsService.AddAction("Obtener productos y precios", "Productos");
             var productos = await _context.Productos
                 .Include(x => x.Categoria) 
                 .Select(x => new ProductoVentaDTO
@@ -216,6 +225,7 @@ namespace Almacen.Controllers
         [HttpGet("productosAgrupadosPorDescatalogado")]
         public async Task<ActionResult> GetProductosAgrupadosPorDescatalogado()
         {
+            await _actionsService.AddAction("Obtener productos descatalogados", "Productos");
             var productos = await _context.Productos
                 .Include(p => p.Categoria)  
                 .GroupBy(g => g.Descatalogado)
@@ -302,7 +312,7 @@ namespace Almacen.Controllers
             return Created("Producto", new { producto = newProducto });
         }
 
-        [HttpPut("{idProducto}")]
+        [HttpPut("{idProducto:int}")]
         public async Task<IActionResult> PutProducto(int idProducto, [FromBody] ProductoUpdateDTO producto)
         {
             if (idProducto != producto.IdProducto)

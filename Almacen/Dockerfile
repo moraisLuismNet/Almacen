@@ -13,7 +13,7 @@ COPY ["Almacen/Almacen.csproj", "Almacen/"]
 RUN dotnet restore "./Almacen/./Almacen.csproj"
 COPY . .
 WORKDIR "/src/Almacen"
-RUN dotnet build "./ALmacen.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Almacen.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
