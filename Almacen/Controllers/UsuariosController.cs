@@ -1,6 +1,5 @@
 ﻿using Almacen.Models;
 using Almacen.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +9,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Almacen.DTOs;
-using Almacen.Models;
-using Almacen.Services;
 
 namespace WebApiAlmacen.Controllers
 {
@@ -23,14 +20,16 @@ namespace WebApiAlmacen.Controllers
         private readonly IConfiguration _configuration;
         private readonly IDataProtector _dataProtector;
         private readonly HashService _hashService;
+        private readonly ILogger<UsuariosController> _logger;
 
         public UsuariosController(AlmacenContext context, IConfiguration configuration,
-        IDataProtectionProvider dataProtector, HashService hashService)
+        IDataProtectionProvider dataProtector, HashService hashService, ILogger<UsuariosController> logger)
         {
             _context = context;
             _configuration = configuration;
             _dataProtector = dataProtector.CreateProtector(configuration["ClaveEncriptacion"]);
             _hashService = hashService;
+            _logger = logger;
         }
 
         [HttpPost("encriptar/nuevoUsuario")]
@@ -111,6 +110,8 @@ namespace WebApiAlmacen.Controllers
         {
             try
             {
+                _logger.LogInformation(usuario.Email + " ha iniciado un login el día " +
+                DateTime.Now);
                 var usuarioDB = await _context.Usuarios.FirstOrDefaultAsync(x => x.Email == usuario.Email);
                 if (usuarioDB == null)
                 {

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebApiAlmacen.Services;
@@ -100,6 +101,16 @@ builder.Services.AddSwaggerGen(c =>
                 });
 
 });
+
+// Configurar Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)  // Leer configuración desde appsettings.json
+    .CreateLogger();
+
+// Usar Serilog como el proveedor de logs en la aplicación
+builder.Host.UseSerilog();
+
+
 
 var app = builder.Build();
 
