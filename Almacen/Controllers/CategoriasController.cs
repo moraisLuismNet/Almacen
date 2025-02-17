@@ -3,6 +3,8 @@ using Almacen.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Almacen.Services;
+using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Almacen.Controllers
 {
@@ -211,6 +213,32 @@ namespace Almacen.Controllers
             return Ok(categoria);
         }
 
+        [HttpGet("procedimiento_almacenado/{id:int}")]
+        public async Task<ActionResult<Categoria>> GetProcedimientoAlmacenado(int id)
+        {
+            try
+            {
+                await _actionsService.AddAction("Obtener categorías con un procedimiento almacenado", "Categorias");
+
+                var categorias = _context.Categorias
+                    .FromSqlInterpolated($"EXEC Categorias_ObtenerPorId {id}")
+                    .IgnoreQueryFilters()
+                    .AsAsyncEnumerable();
+
+                await foreach (var categoria in categorias)
+                {
+                    return categoria;
+                }
+
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, innerException = ex.InnerException?.Message });
+            }
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostCategoria(CategoriaInsertDTO categoria)
         {
@@ -225,6 +253,47 @@ namespace Almacen.Controllers
             return Created("Categoria", new { categoria = newCategoria });
         }
 
+        [Authorize]
+        [HttpPost("Procedimiento_almacenado")]
+        public async Task<ActionResult> PostProcedimientoAlmacenado(CategoriaInsertDTO categoria)
+        {
+            try
+            {
+                using var connection = _context.Database.GetDbConnection();
+                await connection.OpenAsync();
+
+                using var command = connection.CreateCommand();
+                command.CommandText = "EXEC Categorias_Insertar @nombreCategoria, @id OUTPUT";
+                command.CommandType = System.Data.CommandType.Text;
+
+                // Parámetro de entrada
+                var nombreParam = command.CreateParameter();
+                nombreParam.ParameterName = "@nombreCategoria";
+                nombreParam.Value = categoria.NombreCategoria;
+                nombreParam.DbType = System.Data.DbType.String;
+                command.Parameters.Add(nombreParam);
+
+                // Parámetro de salida
+                var idParam = command.CreateParameter();
+                idParam.ParameterName = "@id";
+                idParam.DbType = System.Data.DbType.Int32;
+                idParam.Direction = System.Data.ParameterDirection.Output;
+                command.Parameters.Add(idParam);
+
+                await command.ExecuteNonQueryAsync();
+
+                // Obtener el ID generado
+                var id = (idParam.Value != DBNull.Value) ? (int)idParam.Value : 0;
+
+                return Ok(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, innerException = ex.InnerException?.Message });
+            }
+        }
+
+        [Authorize]
         [HttpPut("{idCategoria:int}")]
         public async Task<IActionResult> PutCategoria(int idCategoria, [FromBody] CategoriaUpdateDTO categoria)
         {
@@ -260,6 +329,7 @@ namespace Almacen.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {

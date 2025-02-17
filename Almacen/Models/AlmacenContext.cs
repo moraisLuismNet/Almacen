@@ -35,6 +35,8 @@ public partial class AlmacenContext : DbContext
 
     public virtual DbSet<Action> Actions { get; set; }
 
+    public virtual DbSet<Usuario> Usuarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Categoria>(entity =>
@@ -66,6 +68,14 @@ public partial class AlmacenContext : DbContext
             entity.Property(e => e.FechaAccion).HasColumnType("datetime");
             entity.Property(e => e.Ip).HasMaxLength(50);
             entity.Property(e => e.Accion).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Usuarios__3214EC07CF9C1A4E");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Password).HasMaxLength(500);
         });
 
         OnModelCreatingPartial(modelBuilder);

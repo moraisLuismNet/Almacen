@@ -3,6 +3,7 @@ using Almacen.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Almacen.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Almacen.Controllers
 {
@@ -296,6 +297,7 @@ namespace Almacen.Controllers
             return Ok(productosDTO);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostProducto(ProductoInsertDTO producto)
         {
@@ -334,6 +336,7 @@ namespace Almacen.Controllers
             return Created("Producto", new { producto = newProducto });
         }
 
+        [Authorize]
         [HttpPut("{idProducto:int}")]
         public async Task<IActionResult> PutProducto(int idProducto, [FromBody] ProductoUpdateDTO producto)
         {
@@ -379,7 +382,7 @@ namespace Almacen.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
