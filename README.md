@@ -6,12 +6,13 @@ ASP.NET Core Web API Almacen
 
 
 ## Program
+``` 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AlmacenContext>(options =>
     options.UseSqlServer(connectionString)
 );
-
+``` 
 
 ## appsetting.Development.json
 ``` 
