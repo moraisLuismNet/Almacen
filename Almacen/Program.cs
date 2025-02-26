@@ -4,7 +4,6 @@ using Almacen.Models;
 using Almacen.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -13,8 +12,6 @@ using System.Text.Json.Serialization;
 using WebApiAlmacen.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 // Esta opción es para evitar referencias circulares al utilizar include en los controllers
 //builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
@@ -103,14 +100,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Configurar Serilog
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)  // Leer configuración desde appsettings.json
-    .CreateLogger();
+//Log.Logger = new LoggerConfiguration()
+//    .ReadFrom.Configuration(builder.Configuration)  // Leer configuración desde appsettings.json
+//    .CreateLogger();
 
 // Usar Serilog como el proveedor de logs en la aplicación
-builder.Host.UseSerilog();
-
-
+//builder.Host.UseSerilog();
 
 var app = builder.Build();
 
@@ -127,7 +122,7 @@ app.UseCors();
 
 app.UseAuthorization();
 
-app.UseMiddleware<RegistroYControlMiddleware>();
+//app.UseMiddleware<RegistroYControlMiddleware>();
 
 app.MapControllers();
 

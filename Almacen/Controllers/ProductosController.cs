@@ -47,7 +47,7 @@ namespace Almacen.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductoDTO>> GetProductoPorId(int id)
         {
-            await _actionsService.AddAction("Obtener productos por id", "Productos");
+            await _actionsService.AddAction("Obtener un producto por id", "Productos");
             var producto = await _context.Productos
                 .Include(p => p.Categoria)  
                 .FirstOrDefaultAsync(p => p.IdProducto == id);
@@ -156,6 +156,7 @@ namespace Almacen.Controllers
         [HttpGet("paginacion/{pagina?}")]
         public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductosPaginacion(int pagina = 1)
         {
+            await _actionsService.AddAction("Obtener productos paginados", "Productos");
             int registrosPorPagina = 5;
             var productos = await _context.Productos
                 .Skip((pagina - 1) * registrosPorPagina)
@@ -180,6 +181,7 @@ namespace Almacen.Controllers
         [HttpGet("paginacion/{desde}/{hasta}")]
         public async Task<ActionResult<IEnumerable<ProductoDTO>>> GetProductosDesdeHasta(int desde, int hasta)
         {
+            await _actionsService.AddAction("Obtener productos paginados desde|hasta", "Productos");
             if (desde < 1)
             {
                 return BadRequest("El mínimo debe ser superior a 0");
@@ -262,6 +264,7 @@ namespace Almacen.Controllers
             servidor de base de datos. Hacer los filtros en memoria es menos eficiente que hacerlos 
             en una base de datos. Construimos los filtros de forma dinámica y hasta que no hacemos el 
             ToListAsync no vamos a la base de datos para traer la información. */
+            await _actionsService.AddAction("Obtener productos con un filtro múltiple", "Productos");
             var productosQueryable = _context.Productos
                 .Include(p => p.Categoria) 
                 .AsQueryable(); 
@@ -301,6 +304,7 @@ namespace Almacen.Controllers
         [HttpPost]
         public async Task<ActionResult> PostProducto(ProductoInsertDTO producto)
         {
+            await _actionsService.AddAction("Añadir productos", "Productos");
             var newProducto = new Producto()
             {
                 NombreProducto = producto.NombreProducto,
@@ -338,8 +342,9 @@ namespace Almacen.Controllers
 
         [Authorize]
         [HttpPut("{idProducto:int}")]
-        public async Task<IActionResult> PutProducto(int idProducto, [FromBody] ProductoUpdateDTO producto)
+        public async Task<IActionResult> PutProducto(int idProducto, [FromForm] ProductoUpdateDTO producto)
         {
+            await _actionsService.AddAction("Actualiza un producto", "Productos");
             if (idProducto != producto.IdProducto)
             {
                 return BadRequest(new { message = "El ID del producto no coincide con el cuerpo de la solicitud" });
@@ -361,20 +366,30 @@ namespace Almacen.Controllers
                 {
                     return BadRequest(new { message = "La categoría proporcionada no existe" });
                 }
-                productoUpdate.CategoriaId = (int)producto.CategoriaId; 
+                productoUpdate.CategoriaId = (int)producto.CategoriaId;
             }
 
             productoUpdate.NombreProducto = producto.NombreProducto;
             productoUpdate.Precio = producto.Precio;
             productoUpdate.FechaAlta = producto.FechaAlta;
             productoUpdate.Descatalogado = producto.Descatalogado;
-            productoUpdate.FotoUrl = producto.FotoUrl;
-            productoUpdate.CategoriaId = (int)producto.CategoriaId;
+
+            if (producto.Foto != null)
+            {
+                using var memoryStream = new MemoryStream();
+                await producto.Foto.CopyToAsync(memoryStream);
+                var contenido = memoryStream.ToArray();
+                var extension = Path.GetExtension(producto.Foto.FileName);
+                var contentType = producto.Foto.ContentType;
+
+                var rutaImagen = await _gestorArchivosService.GuardarArchivo(contenido, extension, "img", contentType);
+                productoUpdate.FotoUrl = rutaImagen;
+            }
 
             try
             {
                 await _context.SaveChangesAsync();
-                return NoContent(); 
+                return NoContent();
             }
             catch (DbUpdateException ex)
             {
@@ -386,6 +401,7 @@ namespace Almacen.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
+            await _actionsService.AddAction("Elimina un producto", "Productos");
             var producto = await _context.Productos.FirstOrDefaultAsync(x => x.IdProducto == id);
 
             if (producto is null)

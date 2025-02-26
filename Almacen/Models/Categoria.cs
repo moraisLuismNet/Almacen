@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Almacen.Models;
+﻿namespace Almacen.Models;
 
 public partial class Categoria
 {

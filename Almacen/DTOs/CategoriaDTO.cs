@@ -7,5 +7,6 @@
         public string NombreCategoria { get; set; } = null!;
 
         public List<ProductoDTO> Productos { get; set; } = new();
+        public int TotalProductos { get; internal set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Almacen.Models;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Almacen.Controllers
@@ -17,7 +17,7 @@ namespace Almacen.Controllers
             _context = context;
         }
 
-        // GET: api/Actions
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult> GetActions()
         {

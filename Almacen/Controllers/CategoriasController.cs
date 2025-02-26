@@ -3,7 +3,6 @@ using Almacen.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Almacen.Services;
-using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Almacen.Controllers
@@ -21,36 +20,23 @@ namespace Almacen.Controllers
             _actionsService = actionsService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<CategoriaDTO>>> GetCategorias()
-        {
-            await _actionsService.AddAction("Obtener categorías", "Categorias");
-            var categorias = await _context.Categorias
-                .Include(c => c.Productos)
-                .ToListAsync();
-
-            var result = categorias.Select(c => new CategoriaDTO
-            {
-                IdCategoria = c.IdCategoria,
-                NombreCategoria = c.NombreCategoria,
-                Productos = c.Productos.Select(p => new ProductoDTO
-                {
-                    IdProducto = p.IdProducto,
-                    NombreProducto = p.NombreProducto,
-                    Precio = p.Precio,
-                    FechaAlta = p.FechaAlta,
-                    Descatalogado = p.Descatalogado,
-                    FotoUrl = p.FotoUrl
-                }).ToList()
-            }).ToList();
-
-            return Ok(result);
-        }
+		[HttpGet]
+		public async Task<ActionResult> GetCategorias()
+		{
+			var categorias = await (from x in _context.Categorias
+                           select new CategoriaDTO
+                           {
+                               IdCategoria = x.IdCategoria,
+                               NombreCategoria = x.NombreCategoria,
+                               TotalProductos= x.Productos.Count()
+                           }).ToListAsync();
+		    return Ok(categorias);
+		}
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<CategoriaItemDTO>> GetCategoriaPorId(int id)
         {
-            await _actionsService.AddAction("Obtener categorías por id", "Categorias");
+            await _actionsService.AddAction("Obtener categorías por id", "Categorías");
             var categoria = await _context.Categorias
                                           
                                           .FirstOrDefaultAsync(c => c.IdCategoria == id);
@@ -71,7 +57,7 @@ namespace Almacen.Controllers
         [HttpGet("ordenNombreCategoria/{desc}")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasOrdenNombre(bool desc)
         {
-            await _actionsService.AddAction("Obtener categorías por orden (nombre)", "Categorias");
+            await _actionsService.AddAction("Obtener categorías por orden (nombre)", "Categorías");
             List<Categoria> categorias;
 
             if (desc)
@@ -95,7 +81,7 @@ namespace Almacen.Controllers
         [HttpGet("nombreCategoria/contiene/{texto}")]
         public async Task<ActionResult<List<CategoriaDTO>>> GetNombreCategoria(string texto)
         {
-            await _actionsService.AddAction("Obtener categorías que contienen (nombre)", "Categorias");
+            await _actionsService.AddAction("Obtener categorías que contienen (nombre)", "Categorías");
             var categorias = await _context.Categorias
                 .Where(x => x.NombreCategoria.Contains(texto))
                 .Include(x => x.Productos)
@@ -122,6 +108,7 @@ namespace Almacen.Controllers
         [HttpGet("paginacion/{pagina?}")]
         public async Task<ActionResult> GetCategoriasPaginacion(int pagina = 1)
         {
+            await _actionsService.AddAction("Obtener categorías paginadas", "Categorías");
             int registrosPorPagina = 2;
 
             var totalCategorias = await _context.Categorias.CountAsync();
@@ -156,6 +143,7 @@ namespace Almacen.Controllers
         [HttpGet("paginacion/{desde}/{hasta}")]
         public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetCategoriasDesdeHasta(int desde, int hasta)
         {
+            await _actionsService.AddAction("Obtener categorías paginadas desde|hasta", "Categorías");
             if (desde < 1)
             {
                 return BadRequest("El mínimo debe ser superior a 0");
@@ -192,7 +180,7 @@ namespace Almacen.Controllers
         [HttpGet("categoriasProductosSelect/{id:int}")]
         public async Task<ActionResult<Categoria>> GetCategoriasProductosSelect(int id)
         {
-            await _actionsService.AddAction("Obtener categorías y productos", "Categorias");
+            await _actionsService.AddAction("Obtener categorías y productos", "Categorías");
             var categoria = await (from x in _context.Categorias
                                  select new CategoriaProductoDTO
                                  {
@@ -218,7 +206,7 @@ namespace Almacen.Controllers
         {
             try
             {
-                await _actionsService.AddAction("Obtener categorías con un procedimiento almacenado", "Categorias");
+                await _actionsService.AddAction("Obtener categoría con un procedimiento almacenado", "Categorías");
 
                 var categorias = _context.Categorias
                     .FromSqlInterpolated($"EXEC Categorias_ObtenerPorId {id}")
@@ -242,6 +230,7 @@ namespace Almacen.Controllers
         [HttpPost]
         public async Task<ActionResult> PostCategoria(CategoriaInsertDTO categoria)
         {
+            await _actionsService.AddAction("Añadir una categoría", "Categorías");
             var newCategoria = new Categoria()
             {
                 NombreCategoria = categoria.NombreCategoria
@@ -259,6 +248,7 @@ namespace Almacen.Controllers
         {
             try
             {
+                await _actionsService.AddAction("Añadir una categoría con un p. a.", "Categorías");
                 using var connection = _context.Database.GetDbConnection();
                 await connection.OpenAsync();
 
@@ -297,6 +287,7 @@ namespace Almacen.Controllers
         [HttpPut("{idCategoria:int}")]
         public async Task<IActionResult> PutCategoria(int idCategoria, [FromBody] CategoriaUpdateDTO categoria)
         {
+            await _actionsService.AddAction("Actualizar una categoría", "Categorías");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -333,6 +324,7 @@ namespace Almacen.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
+            await _actionsService.AddAction("Eliminar una categoría", "Categorías");
             var hayProductos = await _context.Productos.AnyAsync(x => x.CategoriaId == id);
             if (hayProductos)
             {
