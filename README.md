@@ -6,7 +6,7 @@ ASP.NET Core Web API Almacen
 
 
 ## Program
-``` 
+```cs 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AlmacenContext>(options =>
@@ -15,10 +15,12 @@ builder.Services.AddDbContext<AlmacenContext>(options =>
 ``` 
 
 ## appsetting.Development.json
-``` 
+```cs 
 {
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=*;Initial Catalog=Almacen;Integrated Security=True;Encrypt=False"
   }
 }
 ``` 
+
+[DeepWiki moraisLuismNet/Almacen](https://deepwiki.com/moraisLuismNet/Almacen)
