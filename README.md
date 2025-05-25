@@ -1,5 +1,59 @@
 ## Almacen
-ASP.NET Core Web API Almacen
+
+**Almacen** an ASP.NET Core Web API for inventory management.
+
+![Almacen](img/UML.png)
+
+Almacen/  
+├── Clases/  
+│   └── ResultadoHash.cs  
+├── Controllers/  
+│   ├── ActionsController.cs  
+│   ├── CategoriasController.cs  
+│   ├── ProductosController.cs  
+│   └── UsuariosController.cs  
+├── DTOs/  
+│   ├── CategoriaDTO.cs  
+│   ├── CategoriaInsertDTO.cs  
+│   ├── CategoriaItemDTO.cs  
+│   ├── CategoriaProductoDTO.cs  
+│   ├── CategoriaUpdateDTO.cs  
+│   ├── LoginResponseDTO.cs  
+│   ├── ProductoDTO.cs  
+│   ├── ProductoFiltroDTO.cs  
+│   ├── ProductoInsertDTO.cs  
+│   ├── ProductoUpdateDTO.cs  
+│   ├── ProductoVentaDTO.cs  
+│   ├── UsuarioChangePasswordDTO.cs  
+│   └── UsuarioDTO.cs  
+├── Filters/  
+│   └── FiltroDeExcepcion.cs  
+├── Middlewares/  
+│   └── RegistroYControlMiddleware.cs  
+├── Models/  
+│   ├── Action.cs  
+│   ├── AlmacenContext.cs  
+│   ├── Categoria.cs  
+│   ├── Producto.cs  
+│   └── Usuario.cs  
+├── Services/  
+│   ├── ActionService.cs  
+│   ├── GestorArchivosService.cs  
+│   ├── HashService.cs  
+│   ├── IGestorArchivosService.cs  
+│   ├── TareaProgramadaService.cs  
+│   └── TokenService.cs  
+├── Validators/  
+│   ├── GrupoTipoArchivo.cs  
+│   ├── PesoArchivoValidacion.cs  
+│   └── TipoArchivoValidacion.cs  
+├── Properties/  
+│   └── launchSettings.json  
+├── wwwroot/  
+├── appsettings.json  
+├── appsettings.Development.json  
+├── Program.cs  
+└── Almacen.csproj  
 
 ![Almacen](img/1.png)
 ![Almacen](img/2.png)
