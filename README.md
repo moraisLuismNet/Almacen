@@ -1,6 +1,6 @@
 ## Almacen
 
-**Almacen** an ASP.NET Core Web API for inventory management.
+**Almacen** an ASP.NET Core Web API for inventory management, enfocado en la gestión de categorías y productos. Controllers for CRUD operations and queries for Actions, Categories, Products, and Users are presented, with example endpoints that handle retrieving, adding, updating, and deleting data, including features such as JWT authentication, password encryption/hashing, file handling, and stored procedure execution. In addition, exception filters and logging middleware are configured, and Serilog configuration for event logging, database setup and SQL scripts for table creation, and Docker and docker-compose files for containerization are included.
 
 ![Almacen](img/UML.png)
 
@@ -76,5 +76,7 @@ builder.Services.AddDbContext<AlmacenContext>(options =>
   }
 }
 ``` 
+
+![Almacen](img/DB.png)
 
 [DeepWiki moraisLuismNet/Almacen](https://deepwiki.com/moraisLuismNet/Almacen)
