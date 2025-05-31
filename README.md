@@ -50,8 +50,7 @@ Almacen/
 ├── Properties/  
 │   └── launchSettings.json  
 ├── wwwroot/  
-├── appsettings.json  
-├── appsettings.Development.json  
+├── appsettings.json   
 ├── Program.cs  
 └── Almacen.csproj  
 
